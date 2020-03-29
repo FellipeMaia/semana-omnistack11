@@ -1,24 +1,38 @@
-import React from 'react';
+import React,{useEffect} from 'react';
 import {Feather} from '@expo/vector-icons';
-import {useNavigation} from '@react-navigation/native';
-import {View, Text, Image, TouchableOpacity} from 'react-native';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {View, Text, Image, TouchableOpacity, Linking} from 'react-native';
+import * as MailComposer from 'expo-mail-composer';
 
 import styles from './styles';
 import logoImg from '../../assets/logo.png';
 
 export default function Incindents(){
+    const route = useRoute();
+
+    const incindent = route.params.incindent;
+    const value = Intl.NumberFormat('pt-BR',{
+        style: 'currency',
+        currency: 'BRL'
+    }).format(incindent.velue)
+
     const navigation = useNavigation();
+    const messege = `Olá ${incindent.name}, estou entrando em contato pois gostaria de ajudar no caso "${incindent.title}" com  o valor de ${value}.`;
 
     function navigationBack(){
         navigation.goBack();
     }
 
     function sendMail(){
-
+        MailComposer.composeAsync({
+            subject: 'Herói do caso: '+incindent.title,
+            recipients: [incindent.email],
+            body:messege
+        })
     }
 
     function sendWhatsapp(){
-        
+        Linking.openURL(`whatsapp://send?phone=${incindent.whatsapp}&text=${messege}`)
     }
 
     return(
@@ -33,11 +47,11 @@ export default function Incindents(){
             </View>
             <View style={styles.Incindent}>
                 <Text style={styles.IncindentProperty}>OMG:</Text>
-                <Text style={styles.IncindentValue}>APAD</Text>
+                <Text style={styles.IncindentValue}>{incindent.name} de {incindent.city}/{incindent.uf}</Text>
                 <Text style={styles.IncindentProperty}>CASO:</Text>
-                <Text style={styles.IncindentValue}>Cadelinha atropelada</Text>
+                <Text style={styles.IncindentValue}>{incindent.title}</Text>
                 <Text style={styles.IncindentProperty}>Valor:</Text>
-                <Text style={[styles.IncindentValue, {marginBottom:0}]}>R$ 120,00</Text>
+                <Text style={[styles.IncindentValue, {marginBottom:0}]}>{value}</Text>
             </View>
 
             <View style={styles.contactBox}>
@@ -47,12 +61,12 @@ export default function Incindents(){
 
                 <View style={styles.actions}>
                     <TouchableOpacity style={styles.action} 
-                        onPress={()=>{}}
+                        onPress={sendWhatsapp}
                     >
                         <Text style={styles.actionText}>WhatsApp</Text>    
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.action} 
-                        onPress={()=>{}}
+                        onPress={sendMail}
                     >
                         <Text style={styles.actionText}>E-mail</Text>    
                     </TouchableOpacity>
